@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Report: DPO in Custom Grid Environments</title>
+    
+    <!-- EXTERNAL LIBRARIES (Required for Layout & Charts) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- LINK TO YOUR LOCAL CSS FILE -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="text-gray-800">
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 w-full bg-white shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center py-4">
+                <h1 class="text-xl sm:text-2xl font-bold text-teal-700">DPO Project: The Hazard Grid</h1>
+                <nav id="main-nav" class="flex flex-wrap justify-center gap-x-4 gap-y-2 sm:gap-6 mt-2 sm:mt-0 text-sm sm:text-base font-medium text-gray-600">
+                    <a href="#abstract" class="nav-link">Abstract</a>
+                    <a href="#environment" class="nav-link">Environment</a>
+                    <a href="#method" class="nav-link">Method</a>
+                    <a href="#results" class="nav-link">Results</a>
+                    <a href="#conclusion" class="nav-link">Conclusion</a>
+                    <a href="#code" class="nav-link">Code</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
+
+        <!-- Section 1: Abstract -->
+        <section id="abstract" class="space-y-6">
+            <h2 class="text-3xl font-bold text-center text-gray-900">Abstract</h2>
+            <article class="max-w-3xl mx-auto text-center text-gray-700 bg-white p-6 rounded-lg shadow-md">
+                <p>This project explores implementing *Direct Preference Optimization (DPO), a modern alignment technique from LLMs, within a custom Reinforcement Learning task. We designed a **5x5 "HazardGrid-v0"* environment where the shortest path is deadly. Instead of engineering complex rewards, we trained an agent using *Human Preference Data*—a dataset of "Winning" (Preferred) and "Losing" (Rejected) human gameplay. The agent successfully learned to mimic human safety preferences, demonstrating DPO's versatility for sequential decision-making.</p>
+            </article>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                <div class="stat-card">
+                    <div class="text-4xl font-bold text-teal-600">5x5</div>
+                    <div class="text-gray-600 mt-2">Custom Grid</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-4xl font-bold text-teal-600">75</div>
+                    <div class="text-gray-600 mt-2">Human Samples</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-4xl font-bold text-teal-600">1</div>
+                    <div class="text-gray-600 mt-2">DPO-Trained Agent</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Environment -->
+        <section id="environment" class="space-y-6">
+            <h2 class="text-3xl font-bold text-center text-gray-900">The Environment: "HazardGrid-v0"</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <article class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <h3 class="text-xl font-semibold">The Problem</h3>
+                    <p class="text-gray-700">In standard RL, defining a reward function for "safety" is difficult. An agent told to "reach the goal fast" might take a risky shortcut. We built an environment to test this: the shortest path is a deathtrap.</p>
+                    
+                    <h3 class="text-xl font-semibold">Environment Details</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                        <li><span class="font-medium">State Space:</span> Agent's (x, y) coordinates.</li>
+                        <li><span class="font-medium">Action Space:</span> 4 discrete actions (Up, Down, Left, Right).</li>
+                        <li><span class="font-medium">Start (S):</span> Top-Left (0, 0).</li>
+                        <li><span class="font-medium">Goal (G):</span> Bottom-Right (4, 4).</li>
+                        <li><span class="font-medium">Lava (X):</span> Tiles at (1,1), (1,2), (2,2). Entering means "Game Over."</li>
+                    </ul>
+                </article>
+                
+                <!-- Visual Grid Representation -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-center mb-4">Visual Layout</h3>
+                    <div class="flex justify-center">
+                        <div class="grid grid-cols-5 gap-1">
+                            <div class="grid-cell grid-cell-start">S</div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell grid-cell-lava">X</div>
+                            <div class="grid-cell grid-cell-lava">X</div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell grid-cell-lava">X</div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell"></div>
+                            <div class="grid-cell grid-cell-goal">G</div>
+                        </div>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-4">The agent must navigate from (S) to (G) while avoiding (X).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Method -->
+        <section id="method" class="space-y-10">
+            <h2 class="text-3xl font-bold text-center text-gray-900">The DPO Method: Learning from Humans</h2>
+            
+            <!-- 3.1 Data Collection -->
+            <article class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <h3 class="text-2xl font-semibold">Step 3.1: Data Collection</h3>
+                <p class="text-gray-700">Instead of writing a reward function, we acted as the "expert." We played the game, deliberately winning (by taking the safe path) and losing (by hitting lava). Each step from a winning run was labeled "Preferred" (1), and each step from a losing run was "Rejected" (0).</p>
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <canvas id="dataChart"></canvas>
+                </div>
+                <p class="text-center text-sm text-gray-600">Our final dataset consisted of 52 "Preferred" steps from winning runs and 23 "Rejected" steps from losing runs.</p>
+            </article>
+
+            <!-- 3.2 Model Architecture -->
+            <article class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <h3 class="text-2xl font-semibold">Step 3.2: Model Architecture</h3>
+                <p class="text-gray-700">The DPO algorithm requires two models: a *Policy Model* that learns, and a *Reference Model* that stays frozen. This prevents the learning agent from "forgetting" its basic knowledge. Both models share the same simple architecture:</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 my-6">
+                    <div class="nn-layer">Input (2)</div>
+                    <div class="text-2xl font-bold text-teal-600">→</div>
+                    <div class="nn-layer">Hidden (128)</div>
+                    <div class="text-2xl font-bold text-teal-600">→</div>
+                    <div class="nn-layer">Output (4)</div>
+                </div>
+                <p class="text-gray-700"><span class="font-medium">Input (2):</span> The agent's (x, y) coordinates. <br> <span class="font-medium">Output (4):</span> Logits (scores) for each action: Up, Down, Left, Right.</p>
+            </article>
+
+            <!-- 3.3 DPO Loss -->
+            <article class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <h3 class="text-2xl font-semibold">Step 3.3: The DPO Loss Function</h3>
+                <p class="text-gray-700">This is the core of the project. The DPO loss function's goal is to make the Policy Model more likely to choose "Preferred" actions and less likely to choose "Rejected" actions, all relative to the frozen Reference Model.</p>
+                <div class="bg-gray-800 text-gray-200 p-4 rounded-lg font-mono text-sm sm:text-base">
+                    Loss = -log( sigmoid( β * (Policy_Prob - Ref_Prob) * Label ) )
+                </div>
+                <ul class="list-disc list-inside text-gray-700 space-y-2 mt-4">
+                    <li>If the action was *Preferred* (Label=1), the loss punishes the model if its probability isn't higher than the reference.</li>
+                    <li>If the action was *Rejected* (Label=-1), the loss punishes the model if its probability isn't lower than the reference.</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Section 4: Results -->
+        <section id="results" class="space-y-6">
+            <h2 class="text-3xl font-bold text-center text-gray-900">Results: A Safe Agent</h2>
+            
+            <article class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <h3 class="text-2xl font-semibold">Agent Gameplay Simulation</h3>
+                <p class="text-gray-700">The training was successful. We deployed the trained agent back into the environment. The animation below shows a real trajectory taken by the final agent. It successfully identifies the safe path, navigates around the lava, and reaches the goal.</p>
+                
+                <div class="flex flex-col items-center">
+                    <div id="agent-grid-container" class="grid grid-cols-5 gap-1 mb-4">
+                        <!-- Cells will be generated by JS -->
+                    </div>
+                    <button id="play-animation-btn" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-colors">
+                        Play Agent Run
+                    </button>
+                    <p id="agent-status" class="mt-2 font-medium h-6"></p>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <h3 class="text-2xl font-semibold">Key Findings</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-3">
+                    <li>
+                        <strong class="text-gray-900">1. Safety Emergence:</strong> The agent learned to avoid lava without ever receiving an explicit "-100" penalty during training. It learned safety purely from the binary "Died" label on the human's failed runs.
+                    </li>
+                    <li>
+                        <strong class="text-gray-900">2. Stability:</strong> The frozen Reference Model was critical. It provided a stable baseline, preventing the agent from becoming overly confident in bad moves and allowing for smooth convergence.
+                    </li>
+                    <li>
+                        <strong class="text-gray-900">3. Data Efficiency:</strong> The agent achieved optimal behavior with only 75 samples (52 winning steps, 23 losing steps). This is far more efficient than standard RLHF, which would require training a separate, complex Reward Model.
+                    </li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Section 5: Conclusion -->
+        <section id="conclusion" class="space-y-6">
+            <h2 class="text-3xl font-bold text-center text-gray-900">Conclusion & Future Work</h2>
+            <article class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md space-y-4">
+                <p class="text-gray-700">This project successfully demonstrated that Direct Preference Optimization (DPO) is a viable and powerful technique for tasks beyond Large Language Models. By applying it to a custom grid environment, we proved that an agent can learn complex, preferred behaviors (like "safety") from a small dataset of human demonstrations, completely bypassing the need for manual reward engineering.</p>
+                
+                <h3 class="text-xl font-semibold">Future Work</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li>*Continuous Control:* Adapt this DPO framework to continuous action spaces, such as controlling a robotic arm.</li>
+                    <li>*Complex Preferences:* Implement true pairwise preferences (e.g., "Trajectory A is better, but not perfect") instead of simple binary (Win/Loss) outcomes.</li>
+                    <li>*Scale:* Apply this method to larger, more dynamic environments with moving obstacles.</li>
+                </ul>
+            </article>
+        </section>
+        
+        <!-- Section 6: Code Appendix -->
+        <section id="code" class="space-y-6">
+            <h2 class="text-3xl font-bold text-center text-gray-900">Code Appendix</h2>
+            
+            <details class="space-y-2">
+                <summary>Step 2: Custom Environment Code</summary>
+                <div class="code-block">
+<pre><code>
+import gymnasium as gym
+from gymnasium import spaces
+import numpy as np
+
+class HazardGridEnv(gym.Env):
+    def _init_(self):
+        super()._init_()
+        self.size = 5
+        self.action_space = spaces.Discrete(4)
+        
+        self.observation_space = spaces.Box(
+            low=0, high=self.size-1, shape=(2,), dtype=np.int32
+        )
+
+        self.grid_layout = np.zeros((self.size, self.size), dtype=np.int32)
+        self.grid_layout[1, 1:3] = 1 
+        self.grid_layout[2, 2] = 1
+        
+        self.agent_pos = np.array([0, 0], dtype=np.int32)
+        self.goal_pos = np.array([4, 4], dtype=np.int32)
+        self.max_steps = 20
+        self.current_step = 0
+
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
+        self.agent_pos = np.array([0, 0], dtype=np.int32)
+        self.current_step = 0
+        return self.agent_pos.astype(np.int32), {}
+
+    def step(self, action):
+        self.current_step += 1
+        direction = {0: [-1, 0], 1: [1, 0], 2: [0, -1], 3: [0, 1]}
+        move = np.array(direction.get(int(action), [0, 0]), dtype=np.int32)
+        
+        new_pos = np.clip(self.agent_pos + move, 0, self.size-1)
+
+        if self.grid_layout[new_pos[0], new_pos[1]] == 1:
+            return new_pos.astype(np.int32), -10, True, False, {"outcome": "died"}
+        
+        self.agent_pos = new_pos
+        
+        if np.array_equal(self.agent_pos, self.goal_pos):
+            return self.agent_pos.astype(np.int32), 10, True, False, {"outcome": "won"}
+            
+        truncated = self.current_step >= self.max_steps
+        return self.agent_pos.astype(np.int32), -0.1, False, truncated, {}
+</code></pre>
+                </div>
+            </details>
+            
+            <details class="space-y-2">
+                <summary>Step 4 & 5: NN Architecture & DPO Loss</summary>
+                <div class="code-block">
+<pre><code>
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class PolicyNet(nn.Module):
+    def _init_(self):
+        super()._init_()
+        self.fc1 = nn.Linear(2, 128)
+        self.fc2 = nn.Linear(128, 4) # Outputs logits for 4 actions
+        
+    def forward(self, x):
+        if not isinstance(x, torch.Tensor):
+            x = torch.tensor(x, dtype=torch.float32).to(device)
+        x = x.to(device)
+        x = F.relu(self.fc1(x))
+        return self.fc2(x)
+
+# Model Initialization
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+policy_model = PolicyNet().to(device)
+ref_model = PolicyNet().to(device)
+ref_model.load_state_dict(policy_model.state_dict())
+ref_model.eval() # Freeze reference
+
+def dpo_loss(policy_logits, ref_logits, actions, labels):
+    policy_log_probs = F.log_softmax(policy_logits, dim=1)
+    ref_log_probs = F.log_softmax(ref_logits, dim=1)
+    
+    policy_act_prob = policy_log_probs.gather(1, actions.unsqueeze(1))
+    ref_act_prob = ref_log_probs.gather(1, actions.unsqueeze(1))
+    
+    logits_diff = policy_act_prob - ref_act_prob
+    
+    target = torch.tensor(np.array(labels), dtype=torch.float32).to(device)
+    target = target * 2 - 1 
+    
+    beta = 0.5 # Temperature parameter
+    loss = -torch.log(torch.sigmoid(beta * logits_diff.squeeze() * target)).mean()
+    return loss
+</code></pre>
+                </div>
+            </details>
+
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 border-t border-gray-200">
+        <p class="text-sm text-gray-600">DPO Project Report | November 2025</p>
+    </footer>
+
+    <!-- LINK TO YOUR LOCAL JS FILE -->
+    <script src="script.js"></script>
+</body>
+</html>
